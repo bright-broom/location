@@ -4,7 +4,7 @@ provider:
   name: aws
   runtime: python3.11  # Pythonのバージョン
   region: ap-northeast-1  # 東京リージョン
-  memorySize: 1024  # Lambdaのメモリサイズ（1024MB に変更）
+  memorySize: 1024  # Lambdaのメモリサイズ（1024MB）
   timeout: 15  # タイムアウト（秒）
   environment:
     DATABASE_URL: ${env:DATABASE_URL}  # 環境変数から RDS の URL をセット

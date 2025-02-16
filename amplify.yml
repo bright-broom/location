@@ -1,0 +1,30 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm install  # or npm ci (package-lock.json が正しい場合)
+    build:
+      commands:
+        - cd frontend
+        - npm run build
+  artifacts:
+    baseDirectory: frontend/out  # Next.js のビルド成果物を出力
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
+
+backend:
+  phases:
+    preBuild:
+      commands:
+        - cd backend
+        - npm install -g serverless  # Serverless Framework をインストール
+        - pip install -r requirements.txt  # Python の依存関係をインストール
+    build:
+      commands:
+        - cd backend
+        - serverless deploy  # Lambda をデプロイ

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException
 import requests
 from sqlalchemy.orm import Session
 from database import get_db
@@ -10,29 +10,41 @@ IPINFO_API_KEY = os.getenv("IPINFO_API_KEY")
 
 @router.get("/api/location")
 async def get_location(request: Request, db: Session = Depends(get_db)):
-    """ クライアントのIPを取得し、詳細な位置情報を取得 """
-
-    # ✅ まず `x-forwarded-for` を確認（リバースプロキシ対応）
+    """
+    クライアントのIPを取得し、詳細な位置情報を取得
+    """
+    # クライアントのIP取得
     ip = request.headers.get("x-forwarded-for", request.client.host)
 
-    # ✅ ローカルIPなら `ipify.org` で外部IPを取得
+    # ローカルIPの場合、外部IPを取得
     if ip.startswith(("127.", "192.168.", "10.")):
-        ip = requests.get("https://api64.ipify.org").text
+        try:
+            ip = requests.get("https://api64.ipify.org").text
+        except requests.RequestException:
+            raise HTTPException(status_code=500, detail="外部IPの取得に失敗しました")
 
-    # ✅ `ip-api.com` で詳細情報を取得
+    # `ip-api.com` から位置情報を取得
     ip_api_url = f"http://ip-api.com/json/{ip}?fields=status,message,country,regionName,city,zip,lat,lon,isp,org,as,timezone,query"
-    ip_api_data = requests.get(ip_api_url).json()
+    try:
+        ip_api_response = requests.get(ip_api_url)
+        ip_api_data = ip_api_response.json()
+    except requests.RequestException:
+        raise HTTPException(status_code=500, detail="IP情報の取得に失敗しました")
 
-    if ip_api_data["status"] != "success":
-        return {"error": "Could not retrieve location", "ip": ip}
+    if ip_api_data.get("status") != "success":
+        return {"error": "位置情報を取得できませんでした", "ip": ip}
 
-    # ✅ `ipinfo.io`（APIキーがある場合のみ）
+    # `ipinfo.io` から追加情報を取得
     ipinfo_data = {}
     if IPINFO_API_KEY:
-        ipinfo_url = f"https://ipinfo.io/{ip}/json?token={IPINFO_API_KEY}"
-        ipinfo_data = requests.get(ipinfo_url).json()
+        try:
+            ipinfo_url = f"https://ipinfo.io/{ip}/json?token={IPINFO_API_KEY}"
+            ipinfo_response = requests.get(ipinfo_url)
+            ipinfo_data = ipinfo_response.json()
+        except requests.RequestException:
+            ipinfo_data = {}
 
-    # ✅ 取得データを統合
+    # 取得データを統合
     location_data = {
         "ip": ip,
         "city": ip_api_data.get("city"),
@@ -53,25 +65,30 @@ async def get_location(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/api/location")
 async def save_location(data: dict, db: Session = Depends(get_db)):
-    """ 位置情報 + デバイス情報をDBに保存 """
-
-    location = Location(
-        ip=data["ip"],
-        city=data["city"],
-        region=data["region"],
-        country=data["country"],
-        latitude=data["latitude"],
-        longitude=data["longitude"],
-        postal=data.get("postal"),
-        timezone=data.get("timezone"),
-        isp=data.get("isp"),
-        org=data.get("org"),
-        hostname=data.get("hostname"),
-        device=data.get("device"),
-        os=data.get("os"),
-        browser=data.get("browser"),
-        screen_size=data.get("screenSize")
-    )
-    db.add(location)
-    db.commit()
-    return {"status": "saved"}
+    """
+    位置情報 + デバイス情報をDBに保存
+    """
+    try:
+        location = Location(
+            ip=data["ip"],
+            city=data["city"],
+            region=data["region"],
+            country=data["country"],
+            latitude=data["latitude"],
+            longitude=data["longitude"],
+            postal=data.get("postal"),
+            timezone=data.get("timezone"),
+            isp=data.get("isp"),
+            org=data.get("org"),
+            hostname=data.get("hostname"),
+            device=data.get("device"),
+            os=data.get("os"),
+            browser=data.get("browser"),
+            screen_size=data.get("screenSize")
+        )
+        db.add(location)
+        db.commit()
+        return {"status": "saved"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
