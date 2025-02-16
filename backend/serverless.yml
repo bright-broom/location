@@ -2,7 +2,7 @@ service: ipget-api  # サービス名
 
 provider:
   name: aws
-  runtime: python3.9  # Pythonのバージョン
+  runtime: python3.11  # Pythonのバージョン
   region: ap-northeast-1  # 東京リージョン
   memorySize: 1024  # Lambdaのメモリサイズ（1024MB に変更）
   timeout: 15  # タイムアウト（秒）
@@ -23,6 +23,6 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true  # Lambda 用に `pip` を Docker で管理
+    dockerizePip: false  # Lambda 用に `pip` を Docker で管理
     zip: true  # パッケージを圧縮
     slim: true  # 不要なファイルを削除
