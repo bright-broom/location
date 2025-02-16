@@ -1,0 +1,101 @@
+# ==============================
+# 🚀 共通（OS・エディタの設定）
+# ==============================
+
+# macOS 系（.DS_Store などを無視）
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows 系（Thumbs.db などを無視）
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VSCode 設定（ワークスペース用）
+.vscode/
+
+# ==============================
+# 🐍 Python（FastAPI, Backend）
+# ==============================
+
+# 仮想環境
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# MyPy / Pyright キャッシュ
+.mypy_cache/
+.pyright/
+
+# Pipenv / Poetry
+Pipfile
+Pipfile.lock
+poetry.lock
+
+# SQLite（DBファイル）
+*.sqlite3
+*.db
+
+# ==============================
+# 🟢 Node.js（Next.js, Frontend）
+# ==============================
+
+# npm / Yarn / pnpm キャッシュ
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js ビルド
+.next/
+out/
+
+# Next.js 環境変数
+.env.local
+.env.development
+.env.production
+
+# TypeScript キャッシュ
+*.tsbuildinfo
+
+# ESLint / Prettier キャッシュ
+.eslintcache
+
+# Tailwind CSS
+postcss.config.js
+postcss.config.ts
+tailwind.config.js
+tailwind.config.ts
+
+# ==============================
+# 🛠 Railway / Render / Vercel
+# ==============================
+
+# Vercel のビルドキャッシュ
+.vercel/
+
+# Railway / Render デプロイ設定
+.railway/
+.render/
+
+# ==============================
+# 🔥 ログ / デバッグファイル
+# ==============================
+
+logs/
+*.log
+debug.log
+npm-debug.log
+yarn-debug.log
+pnpm-debug.log
+
+# Python のログ
+*.log
