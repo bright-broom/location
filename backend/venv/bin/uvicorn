@@ -1,4 +1,4 @@
-#!/Users/toshikisakuta/Desktop/ipget/venv/bin/python3
+#!/Users/toshikisakuta/Desktop/ipget/backend/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
