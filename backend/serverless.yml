@@ -1,0 +1,28 @@
+service: ipget-api  # サービス名
+
+provider:
+  name: aws
+  runtime: python3.9  # Pythonのバージョン
+  region: ap-northeast-1  # 東京リージョン
+  memorySize: 1024  # Lambdaのメモリサイズ（1024MB に変更）
+  timeout: 15  # タイムアウト（秒）
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}  # 環境変数から RDS の URL をセット
+
+functions:
+  app:
+    handler: server.lambda_handler  # `server.py` の `lambda_handler` を使う
+    events:
+      - http:
+          path: /{proxy+}  # すべてのルートを API Gateway にマッピング
+          method: any
+          cors: true
+
+plugins:
+  - serverless-python-requirements  # Lambda に必要なパッケージを管理
+
+custom:
+  pythonRequirements:
+    dockerizePip: true  # Lambda 用に `pip` を Docker で管理
+    zip: true  # パッケージを圧縮
+    slim: true  # 不要なファイルを削除
